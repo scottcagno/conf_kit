@@ -12,6 +12,8 @@ import (
 )
 
 /*
+ * 	INSTRUCTION
+ * 	-----------
  *  1) compile and execute this file
  *	2) open config/mycfg.json
  * 	3) simply save or change data and save
@@ -22,9 +24,9 @@ func main() {
 
 	// setup new config location
 	cfg := conf_kit.NewConfig("config/mycfg.json")
-	// run watch method; check the file every 10 seconds, debug mode set to true
+	// run watch method; check the file every 3 seconds, debug mode set to true
 	cfg.Watch(3, true)
 
-	// used to halt program; otherwise program will exit right after the watch function runs
+	// this is used to halt program; otherwise program will exit right after the watch function runs
 	func() { fmt.Println("save/change config file, any key will exit..."); var n int; fmt.Scanln(&n) }()
 }
