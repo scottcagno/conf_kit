@@ -17,40 +17,43 @@ import (
 
 // config structure
 type Config struct {
-	fpath string
-	data  map[string]interface{}
-	mu    sync.Mutex
+	Path string
+	Data  map[string]interface{}
+	sync.Mutex
 }
 
 // create new config structure instance
 // return pointer to instance
-func NewConfig(fpath string) *Config {
-	return &Config{fpath: fpath}
+func NewConfig(path string) *Config {
+	return &Config{
+		Path: path,
+        Data: getData(path),
+	}
 }
 
-// watches config file, updates data map every time file changes
+// watches config file, updates Data map every time file changes
 func (self *Config) Watch(n int64, debug bool) {
 	// check to see if file has changed since n seconds ago
-	if changed(self.fpath, n) {
-		// file changed; lock mutex to make data map threadsafe
-		self.mu.Lock()
-		// update data map with new data from file
-		self.data = getdata(self.fpath)
+	if changed(self.Path, n) {
+		// file changed; lock mutex to make Data map threadsafe
+		self.Lock()
+		// update Data map with new Data from file
+		self.Data = getData(self.Path)
 		// unlock mutex and proceed
-		self.mu.Unlock()
+		self.Unlock()
 		// check debug status, if true print info
 		if debug {
-			log.Printf("%q changed. updated map data\n  ~ %+v\n", self.fpath, self.data)
+			log.Printf("%q changed, updated information: %+v\n", self.Path, self.Data)
 		}
 	}
 	// wait for n seconds then recurse; aka: call this func again from within itself
 	time.AfterFunc(time.Duration(n)*time.Second, func() { self.Watch(n, debug) })
 }
 
-// returns updated file data as map
-func getdata(fpath string) map[string]interface{} {
-	// read file data (json []byte) into b
-	b, err := ioutil.ReadFile(fpath)
+// returns updated file Data as map
+func getData(path string) map[string]interface{} {
+	// read file Data (json []byte) into b
+	b, err := ioutil.ReadFile(path)
 	// err check
 	if err != nil {
 		// if err; print timestamp and err, then panic
@@ -70,9 +73,9 @@ func getdata(fpath string) map[string]interface{} {
 }
 
 // returns true if file has been modified within n seconds, else return false
-func changed(fpath string, n int64) bool {
+func changed(path string, n int64) bool {
 	// gather file status
-	fstat, err := os.Stat(fpath)
+	fstat, err := os.Stat(path)
 	// err check
 	if err != nil {
 		// if err; print timestamp and err, then panic
